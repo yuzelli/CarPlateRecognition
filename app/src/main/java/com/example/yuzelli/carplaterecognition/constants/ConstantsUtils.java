@@ -14,6 +14,9 @@ public class ConstantsUtils {
     public static final String SP_MU_BIAO_DEVICE_INFO = "MUBIAOSHEBEI";
     public static final String SP_TIME = "TIME_SETING";
 
+    //用户头像存放文件名
+    public static final String AVATAR_FILE_PATH = "/userHeadImg.jpg";
+
 
 
 
