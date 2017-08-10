@@ -112,6 +112,11 @@
         android:layout_alignParentBottom="true"
         android:background="@drawable/view_shape_gary_green"
         android:textSize="16sp" />
+    <ProgressBar
+        android:id="@+id/prog"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerInParent="true"/>
     <TextView
         android:id="@+id/tv_congpa"
         android:layout_width="match_parent"

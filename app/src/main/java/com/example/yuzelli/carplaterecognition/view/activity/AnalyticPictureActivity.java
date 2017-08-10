@@ -13,6 +13,7 @@ import android.util.Base64;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.yuzelli.carplaterecognition.R;
@@ -21,6 +22,7 @@ import com.example.yuzelli.carplaterecognition.bean.CarBean;
 import com.example.yuzelli.carplaterecognition.constants.ConstantsUtils;
 import com.example.yuzelli.carplaterecognition.https.OkHttpClientManager;
 import com.example.yuzelli.carplaterecognition.utils.AuthService;
+import com.example.yuzelli.carplaterecognition.utils.BaiduLoading;
 import com.example.yuzelli.carplaterecognition.utils.OtherUtils;
 import com.example.yuzelli.carplaterecognition.utils.SharePreferencesUtil;
 
@@ -57,6 +59,8 @@ public class AnalyticPictureActivity extends BaseActivity {
 
     @BindView(R.id.tv_ok)
     TextView tvOk;
+    @BindView(R.id.prog)
+    ProgressBar prog;
     private AnalyticPictureActivityHandler handler;
     private String filePath;
     private  Bitmap bitmap;
@@ -77,7 +81,7 @@ public class AnalyticPictureActivity extends BaseActivity {
         imageView.setImageBitmap(bitmap);
         context = this;
 
-                doGetImageInfo(bitmap);
+        doGetImageInfo(bitmap);
 
 
 
@@ -85,7 +89,7 @@ public class AnalyticPictureActivity extends BaseActivity {
 
     private void doGetImageInfo(Bitmap bm) {
 
-
+        prog.setVisibility(View.VISIBLE);
         String url = URL + token;
         final Map<String, String> map = new HashMap<>();
         map.put("image", removeN(bitmapToBase64(bm)));
@@ -94,10 +98,12 @@ public class AnalyticPictureActivity extends BaseActivity {
             @Override
             public void requestFailure(Request request, IOException e) {
                 showToast(request.body().toString());
+                prog.setVisibility(View.GONE);
             }
 
             @Override
             public void requestSuccess(String result) throws Exception {
+                prog.setVisibility(View.GONE);
                 Message msg = new Message();
                 msg.what = 1001;
                 msg.obj = result;
@@ -237,7 +243,7 @@ public class AnalyticPictureActivity extends BaseActivity {
                     buffer.append(jsonObject.optString("words"));
                 }
 
-                String  number = buffer.toString();
+                String  number = buffer.toString().replaceAll(" ","");
                 if (number.length()>8){
                     number = number.substring(0,8);
                 }
@@ -270,7 +276,19 @@ public class AnalyticPictureActivity extends BaseActivity {
         try {
             File f = new File("mnt/sdcard/myCarList.xls");
             if (f.exists()){
+                ArrayList<CarBean> carLists  = (ArrayList<CarBean>) SharePreferencesUtil.readObject(context, ConstantsUtils.CAR_INFO);
+                if (carLists ==null){
+                    carLists = new ArrayList<>();
+                }
+                for (CarBean c :carLists){
+                    if (c.getNumber().equals(etNumner.getText().toString().trim())){
+                        showToast("该字符已经保存到excel中，请重新识别其他图片！");
+                        return;
+                    }
+                }
                 f.delete();
+            }else {
+               SharePreferencesUtil.saveObject(context, ConstantsUtils.CAR_INFO,null);
             }
             // 打开文件
             WritableWorkbook book = Workbook.createWorkbook(new File("mnt/sdcard/myCarList.xls"));
@@ -301,7 +319,7 @@ public class AnalyticPictureActivity extends BaseActivity {
                 sheet.addCell(l3);
 
             }
-            showToast("文件已导出，文件名为：myCarList，请前往sd卡中查看");
+            showToast("保存成功！");
             //写入数据并关闭
             book.write();
             book.close();
