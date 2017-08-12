@@ -305,7 +305,7 @@ public class OkHttpClientManager {
         requestBody = builder.build();
         //结果返回
         // 请求对象
-        final Request request = new Request.Builder().url(url).post(requestBody).build();
+        final Request request = new Request.Builder().url(url).post(requestBody).addHeader("Content-Type","application/x-www-form-urlencoded").build();
         mClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

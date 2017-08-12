@@ -17,7 +17,7 @@ import java.io.OutputStream;
 public class ImageUtils {
     // 图片转为文件
     public static boolean saveBitmap2file(Bitmap bmp) {
-        Bitmap.CompressFormat format = Bitmap.CompressFormat.JPEG;
+        Bitmap.CompressFormat format = Bitmap.CompressFormat.PNG;
         int quality = 100;
         OutputStream stream = null;
         try {

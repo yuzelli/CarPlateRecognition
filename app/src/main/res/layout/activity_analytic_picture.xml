@@ -64,6 +64,7 @@
                 android:textSize="16sp" />
 
             <EditText
+                android:id="@+id/et_numner"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:background="#EFE4E2" />
@@ -85,6 +86,7 @@
                 android:textSize="16sp" />
 
             <EditText
+                android:id="@+id/et_color"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:background="#EFE4E2" />
@@ -118,6 +120,7 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/tv_ok"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:gravity="center"

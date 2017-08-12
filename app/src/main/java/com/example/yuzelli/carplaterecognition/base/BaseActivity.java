@@ -16,6 +16,12 @@ public abstract class BaseActivity extends FragmentActivity {
     private Unbinder unbinder;
     protected Bundle savedInstanceState;
     public final static String pageSize = "20/";
+    public static String token;
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

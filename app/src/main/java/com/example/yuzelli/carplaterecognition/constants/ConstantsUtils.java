@@ -16,6 +16,7 @@ public class ConstantsUtils {
 
     //用户头像存放文件名
     public static final String AVATAR_FILE_PATH = "/userHeadImg.jpg";
+    public static final String CAR_INFO = "CAR_INFO_MESSAGE";
 
 
 
