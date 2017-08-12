@@ -7,7 +7,6 @@ import java.io.Serializable;
  */
 
 public class CarBean implements Serializable {
-    private String color;
     private String number;
     private String time;
 
@@ -17,14 +16,6 @@ public class CarBean implements Serializable {
 
     public void setTime(String time) {
         this.time = time;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
     }
 
     public String getNumber() {

@@ -23,6 +23,7 @@ import com.example.yuzelli.carplaterecognition.utils.AuthService;
 import com.example.yuzelli.carplaterecognition.utils.OtherUtils;
 import com.example.yuzelli.carplaterecognition.utils.SharePreferencesUtil;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -44,7 +45,7 @@ import jxl.write.WriteException;
 import okhttp3.Request;
 
 public class AnalyticPictureActivity extends BaseActivity {
-    private static String URL = "https://aip.baidubce.com/rest/2.0/ocr/v1/license_plate?access_token=";
+    private static String URL = "https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic?access_token=";
 
     @BindView(R.id.imageView)
     ImageView imageView;
@@ -52,8 +53,7 @@ public class AnalyticPictureActivity extends BaseActivity {
     ImageView imgBack;
     @BindView(R.id.et_numner)
     EditText etNumner;
-    @BindView(R.id.et_color)
-    EditText etColor;
+
     @BindView(R.id.tv_ok)
     TextView tvOk;
     private AnalyticPictureActivityHandler handler;
@@ -88,6 +88,7 @@ public class AnalyticPictureActivity extends BaseActivity {
         String url = URL + token;
         final Map<String, String> map = new HashMap<>();
         map.put("image", removeN(bitmapToBase64(bm)));
+        map.put("language_type", "CHN_ENG");
         OkHttpClientManager.postAsync(url, map, new OkHttpClientManager.DataCallBack() {
             @Override
             public void requestFailure(Request request, IOException e) {
@@ -180,13 +181,12 @@ public class AnalyticPictureActivity extends BaseActivity {
                     carLists = new ArrayList<>();
                 }
                 for (CarBean c :carLists){
-                    if (c.getColor().equals(etColor.getText().toString().trim())&&c.getNumber().equals(etNumner.getText().toString().trim())){
-                        showToast("该颜色的车牌已经保存！");
+                    if (c.getNumber().equals(etNumner.getText().toString().trim())){
+                        showToast("该字符已经保存到excel中，请重新识别其他图片！");
                         return;
                     }
                 }
                 CarBean car = new CarBean();
-                car.setColor(etColor.getText().toString().trim());
                 car.setNumber(etNumner.getText().toString().trim());
                 car.setTime(System.currentTimeMillis()+"");
                 carLists.add(car);
@@ -219,10 +219,17 @@ public class AnalyticPictureActivity extends BaseActivity {
         try {
             JSONObject json = new JSONObject(msgResult);
             if (json.isNull("error_code")) {
-                JSONObject words_result = json.optJSONObject("words_result");
-                String   color = words_result.optString("color");
-                String  number = words_result.optString("number");
-                etColor.setText(color);
+                JSONArray words_result = json.optJSONArray("words_result");
+                StringBuffer buffer = new StringBuffer();
+                for (int i = 0 ; i < words_result.length();i++){
+                    JSONObject jsonObject = (JSONObject) words_result.get(i);
+                    buffer.append(jsonObject.optString("words"));
+                }
+
+                String  number = buffer.toString();
+                if (number.length()>8){
+                    number = number.substring(0,8);
+                }
                 etNumner.setText(number);
             }else {
                 showToast("图片识别失败！");
@@ -263,12 +270,12 @@ public class AnalyticPictureActivity extends BaseActivity {
             Label label = new Label(0, 0, "序号");
             Label labe2 = new Label(1, 0, "时间");
             Label labe3 = new Label(2, 0, "车牌号");
-            Label labe4 = new Label(3, 0, "车车牌颜色");
+
             // 将定义好的单元格添加到工作表中
             sheet.addCell(label);
             sheet.addCell(labe2);
             sheet.addCell(labe3);
-            sheet.addCell(labe4);
+
             // 生成一个保存数字的单元格，必须使用Number的完整包路径，否则有语法歧义。
             //单元格位置是第二列，第一行，值为123
 //                jxl.write.Number number = new jxl.write.Number(1, 0, 123);
@@ -277,11 +284,10 @@ public class AnalyticPictureActivity extends BaseActivity {
                 Label ll = new Label(0, i+1, (i+1)+"");
                 Label l2 = new Label(1, i+1, OtherUtils.stampToDate(cars.get(i).getTime()));
                 Label l3 = new Label(2, i+1, cars.get(i).getNumber());
-                Label l4 = new Label(3, i+1, cars.get(i).getColor());
+
                 sheet.addCell(ll);
                 sheet.addCell(l2);
                 sheet.addCell(l3);
-                sheet.addCell(l4);
 
             }
             showToast("文件已导出，文件名为：myCarList，请前往sd卡中查看");

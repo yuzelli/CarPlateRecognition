@@ -42,18 +42,14 @@ import butterknife.OnClick;
 public class MainActivity extends BaseActivity {
     @BindView(R.id.tv_take)
     TextView tvTake;
-    @BindView(R.id.rw_head)
-    ImageView rw_head;
+
     /**
      * 定义三种状态
      */
     private static final int HEAD_PORTRAIT_PIC = 1;//相册
     private static final int HEAD_PORTRAIT_CAM = 2;//相机
     private static final int HEAD_PORTRAIT_CUT = 3;//图片裁剪
-    @BindView(R.id.tv_cancel)
-    TextView tvCancel;
-    @BindView(R.id.tv_ok)
-    TextView tvOk;
+
 
     private File photoFile;
     private Bitmap photoBitmap;
@@ -121,8 +117,6 @@ public class MainActivity extends BaseActivity {
                         //返回有缩略图
                         if(data.hasExtra("data")){
                             photoBitmap = data.getParcelableExtra("data");
-                            rw_head.setScaleType(ImageView.ScaleType.FIT_XY);
-                            rw_head.setImageBitmap(photoBitmap);
                             try {
                                 File SDCardRoot = Environment.getExternalStorageDirectory();
                                 if (ImageUtils.saveBitmap2file(photoBitmap)) {
@@ -142,8 +136,6 @@ public class MainActivity extends BaseActivity {
                        // String url = getRealFilePath(MainActivity.this,photoUri);
                         try {
                             photoBitmap  =getBitmapFormUri(MainActivity.this,photoUri);
-                            rw_head.setScaleType(ImageView.ScaleType.FIT_XY);
-                            rw_head.setImageBitmap(photoBitmap);
                             File SDCardRoot = Environment.getExternalStorageDirectory();
                             if (ImageUtils.saveBitmap2file(photoBitmap)) {
                                 isSetImgFlag = true;
@@ -152,11 +144,8 @@ public class MainActivity extends BaseActivity {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-
-
                     }
-
-
+                    AnalyticPictureActivity.actionStart(MainActivity.this,photoPath);
                     break;
                 case HEAD_PORTRAIT_PIC:
                     if (data == null || data.getData() == null) {
@@ -247,26 +236,13 @@ public class MainActivity extends BaseActivity {
 
 
 
-    @OnClick({R.id.tv_take, R.id.tv_cancel, R.id.tv_go, R.id.tv_ok})
+    @OnClick({R.id.tv_take})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_take:
                 openPhotoGraph();
                 break;
-            case R.id.tv_go:
-                CarListActivity.actionStart(MainActivity.this);
-                break;
-            case R.id.tv_cancel:
-                isSetImgFlag = false;
-                rw_head.setImageResource(R.drawable.ic_no_img);
-                break;
-            case R.id.tv_ok:
-                if (isSetImgFlag){
-                    AnalyticPictureActivity.actionStart(MainActivity.this,photoPath);
-                }else {
-                    showToast("图片未设置！");
-                }
-                break;
+
         }
     }
 }

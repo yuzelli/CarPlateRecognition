@@ -48,7 +48,6 @@
         android:layout_marginBottom="10dp"
         android:gravity="center"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/rw_head"
         android:layout_marginTop="5dp"
         android:layout_centerHorizontal="true"
         android:text="扫描车牌"/>

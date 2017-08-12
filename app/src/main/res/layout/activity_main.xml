@@ -4,71 +4,20 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_cancel_shape"
+    android:background="@drawable/bg"
     tools:context="com.example.yuzelli.carplaterecognition.view.activity.MainActivity">
 
     <TextView
         android:id="@+id/tv_take"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:background="@drawable/view_shape"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@drawable/ic_home"
         android:textColor="@color/white"
         android:textSize="25sp"
         android:gravity="center"
-        android:layout_below="@+id/rw_head"
-        android:layout_marginTop="20dp"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:text="扫描车牌"/>
-    <TextView
-        android:id="@+id/tv_go"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:background="@drawable/view_shape"
-        android:textColor="@color/white"
-        android:textSize="25sp"
-        android:gravity="center"
-        android:layout_below="@+id/tv_take"
-        android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true"
-        android:text="查看已扫描车牌"/>
-  <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="50dp"
-      android:orientation="horizontal"
-      android:layout_alignParentBottom="true">
-      <TextView
-          android:id="@+id/tv_cancel"
-          android:layout_width="0dp"
-          android:layout_height="match_parent"
-          android:layout_weight="1"
-          android:textColor="@color/white"
-          android:textSize="20sp"
-          android:gravity="center"
-          android:text="取消"
-          android:background="@drawable/view_shape_green"/>
-      <View
-          android:layout_width="20dp"
-          android:layout_height="0dp"/>
-      <TextView
-          android:id="@+id/tv_ok"
-          android:layout_width="0dp"
-          android:layout_height="match_parent"
-          android:layout_weight="1"
-          android:textColor="@color/white"
-          android:textSize="20sp"
-          android:gravity="center"
-          android:text="确定"
-          android:background="@drawable/view_shape_green"/>
+        android:layout_marginBottom="21dp" />
 
-  </LinearLayout>
-
-    <ImageView
-        android:id="@+id/rw_head"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:scaleType="fitXY"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:src="@drawable/ic_no_img"/>
 
 </RelativeLayout>
