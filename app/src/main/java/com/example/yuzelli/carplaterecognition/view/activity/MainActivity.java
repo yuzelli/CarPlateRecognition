@@ -179,7 +179,7 @@ public class MainActivity extends BaseActivity {
                     AnalyticPictureActivity.actionStart(MainActivity.this, photoPath);
                     break;
                 case GET_IMAGE_BY_CAMERA_U:
-                    showToast("llllllllllllllllllllllll");
+
                     if (data != null) { //可能尚未指定intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
                         //返回有缩略图
                         if (data.hasExtra("data")) {

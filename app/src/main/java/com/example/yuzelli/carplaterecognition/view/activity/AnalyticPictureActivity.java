@@ -188,7 +188,7 @@ public class AnalyticPictureActivity extends BaseActivity {
                 }
                 for (CarBean c :carLists){
                     if (c.getNumber().equals(etNumner.getText().toString().trim())){
-                        showToast("该字符已经保存到excel中，请重新识别其他图片！");
+                        showToast("保存成功！");
                         return;
                     }
                 }
@@ -197,7 +197,7 @@ public class AnalyticPictureActivity extends BaseActivity {
                 car.setTime(System.currentTimeMillis()+"");
                 carLists.add(car);
                 SharePreferencesUtil.saveObject(context,ConstantsUtils.CAR_INFO,carLists);
-                craetExcel();
+                craetExcel(car);
                 Intent intent = new Intent();
                 setResult(1001, intent);
                 finish();
@@ -249,7 +249,7 @@ public class AnalyticPictureActivity extends BaseActivity {
                 }
                 etNumner.setText(number);
             }else {
-                showToast("图片识别失败！");
+
                 finish();
              //  showToast(json.optString(""));
 //                new Thread(new Runnable() {
@@ -267,31 +267,31 @@ public class AnalyticPictureActivity extends BaseActivity {
     }
 
 
-    private void craetExcel() {
+    private void craetExcel(CarBean c) {
 
         ArrayList<CarBean>   cars = (ArrayList<CarBean>) SharePreferencesUtil.readObject(this, ConstantsUtils.CAR_INFO);
         if(cars==null){
             cars = new ArrayList<>();
         }
         try {
-            File f = new File("mnt/sdcard/myCarList.xls");
+            File fcar = new File("mnt/sdcard/car");
+            if (!fcar.exists()){
+                fcar.mkdirs();
+            }
+            File f = new File("mnt/sdcard/car/myCarList.xls");
             if (f.exists()){
-                ArrayList<CarBean> carLists  = (ArrayList<CarBean>) SharePreferencesUtil.readObject(context, ConstantsUtils.CAR_INFO);
-                if (carLists ==null){
-                    carLists = new ArrayList<>();
-                }
-                for (CarBean c :carLists){
-                    if (c.getNumber().equals(etNumner.getText().toString().trim())){
-                        showToast("该字符已经保存到excel中，请重新识别其他图片！");
-                        return;
-                    }
-                }
                 f.delete();
             }else {
                SharePreferencesUtil.saveObject(context, ConstantsUtils.CAR_INFO,null);
+               cars = (ArrayList<CarBean>) SharePreferencesUtil.readObject(this, ConstantsUtils.CAR_INFO);
+                if(cars==null){
+                    cars = new ArrayList<>();
+                }
+                cars.add(c);
+
             }
             // 打开文件
-            WritableWorkbook book = Workbook.createWorkbook(new File("mnt/sdcard/myCarList.xls"));
+            WritableWorkbook book = Workbook.createWorkbook(new File("mnt/sdcard/car/myCarList.xls"));
             // 生成名为“第一张工作表”的工作表，参数0表示这是第一页
             WritableSheet sheet = book.createSheet("第一张工作表", 0);
             // 在Label对象的构造子中指名单元格位置是第一列第一行(0,0)
