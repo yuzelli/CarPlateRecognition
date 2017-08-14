@@ -1,17 +1,22 @@
 package com.example.yuzelli.carplaterecognition.view.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,7 +60,7 @@ public class MainActivity extends BaseActivity {
     private Bitmap photoBitmap;
     private String photoPath;
     private boolean isSetImgFlag = false;
-
+    private Activity context;
 
     @Override
     protected int layoutInit() {
@@ -64,15 +69,13 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void binEvent() {
-
+        context = this;
         new Thread(new Runnable() {
             @Override
             public void run() {
                 token = AuthService.getAuth();
             }
         }).start();
-
-
     }
 
     @Override
@@ -80,11 +83,11 @@ public class MainActivity extends BaseActivity {
 
     }
 
-
-
+    public final int GET_IMAGE_BY_CAMERA_U = 5001;
     Uri photoUri;
+
     //打开相机方法
-    private void openPhotoGraph() {
+    public void openPhotoGraph() {
         String state = Environment.getExternalStorageState();
         if (state.equals(Environment.MEDIA_MOUNTED)) {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -94,10 +97,34 @@ public class MainActivity extends BaseActivity {
             }
             photoFile = new File(file, System.currentTimeMillis() + "");
 
-            photoUri = Uri.fromFile(photoFile);
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
-            intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
-            startActivityForResult(intent, HEAD_PORTRAIT_CAM);
+//
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                photoUri = FileProvider.getUriForFile(context,"com.example.yuzelli.carplaterecognition.fileprovider", file);//这里进行替换uri的获得方式
+//                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+//                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);//这里加入flag
+//                intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
+//                startActivityForResult(intent, HEAD_PORTRAIT_CAM);
+                intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+                //intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+
+/*
+* 这里就是高版本需要注意的，需用使用FileProvider来获取Uri，同时需要注意getUriForFile
+* 方法第二个参数要与AndroidManifest.xml中provider的里面的属性authorities的值一致
+* */
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                photoUri = FileProvider.getUriForFile(MainActivity.this,
+                        "com.example.yuzelli.carplaterecognition.fileprovider", photoFile);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+
+                startActivityForResult(intent, GET_IMAGE_BY_CAMERA_U);
+            } else {
+                photoUri = Uri.fromFile(photoFile);//这里进行替换uri的获得方式
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
+                startActivityForResult(intent, HEAD_PORTRAIT_CAM);
+            }
+
         } else {
 
             Toast.makeText(this, "请确认已经插入SD卡", Toast.LENGTH_SHORT).show();
@@ -108,14 +135,18 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==1000&&resultCode==1001){
+            openPhotoGraph();
+        }
+
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case HEAD_PORTRAIT_CAM:
                     //startPhotoZoom(Uri.fromFile(photoFile));
 
-                    if(data !=null){ //可能尚未指定intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                    if (data != null) { //可能尚未指定intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
                         //返回有缩略图
-                        if(data.hasExtra("data")){
+                        if (data.hasExtra("data")) {
                             photoBitmap = data.getParcelableExtra("data");
                             try {
                                 File SDCardRoot = Environment.getExternalStorageDirectory();
@@ -128,14 +159,14 @@ public class MainActivity extends BaseActivity {
                             }
                             //得到bitmap后的操作
                         }
-                    }else{
+                    } else {
                         //由于指定了目标uri，存储在目标uri，intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
                         // 通过目标uri，找到图片
                         // 对图片的缩放处理
                         // 操作
-                       // String url = getRealFilePath(MainActivity.this,photoUri);
+                        // String url = getRealFilePath(MainActivity.this,photoUri);
                         try {
-                            photoBitmap  =getBitmapFormUri(MainActivity.this,photoUri);
+                            photoBitmap = getBitmapFormUri(MainActivity.this, photoUri);
                             File SDCardRoot = Environment.getExternalStorageDirectory();
                             if (ImageUtils.saveBitmap2file(photoBitmap)) {
                                 isSetImgFlag = true;
@@ -145,16 +176,46 @@ public class MainActivity extends BaseActivity {
                             e.printStackTrace();
                         }
                     }
-                    AnalyticPictureActivity.actionStart(MainActivity.this,photoPath);
+                    AnalyticPictureActivity.actionStart(MainActivity.this, photoPath);
                     break;
-                case HEAD_PORTRAIT_PIC:
-                    if (data == null || data.getData() == null) {
-                        return;
+                case GET_IMAGE_BY_CAMERA_U:
+                    showToast("llllllllllllllllllllllll");
+                    if (data != null) { //可能尚未指定intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                        //返回有缩略图
+                        if (data.hasExtra("data")) {
+                            photoBitmap = data.getParcelableExtra("data");
+                            try {
+                                File SDCardRoot = Environment.getExternalStorageDirectory();
+                                if (ImageUtils.saveBitmap2file(photoBitmap)) {
+                                    isSetImgFlag = true;
+                                    photoPath = SDCardRoot + ConstantsUtils.AVATAR_FILE_PATH;
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            //得到bitmap后的操作
+                        }
+                    } else {
+                        //由于指定了目标uri，存储在目标uri，intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                        // 通过目标uri，找到图片
+                        // 对图片的缩放处理
+                        // 操作
+                        // String url = getRealFilePath(MainActivity.this,photoUri);
+                        try {
+                            photoBitmap = getBitmapFormUri(MainActivity.this, photoUri);
+                            File SDCardRoot = Environment.getExternalStorageDirectory();
+                            if (ImageUtils.saveBitmap2file(photoBitmap)) {
+                                isSetImgFlag = true;
+                                photoPath = SDCardRoot + ConstantsUtils.AVATAR_FILE_PATH;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
+                    AnalyticPictureActivity.actionStart(MainActivity.this, photoPath);
 
 
-
-                   // startPhotoZoom(data.getData());
+                    // startPhotoZoom(data.getData());
                     break;
 //                case HEAD_PORTRAIT_CUT:
 //                    if (data != null) {
@@ -212,6 +273,7 @@ public class MainActivity extends BaseActivity {
 
         return compressImage(bitmap);//再进行质量压缩
     }
+
     /**
      * 质量压缩方法
      *
@@ -235,12 +297,38 @@ public class MainActivity extends BaseActivity {
     }
 
 
+    private final int NEED_CAMERA = 200;
 
     @OnClick({R.id.tv_take})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_take:
-                openPhotoGraph();
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED
+                        || ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    context.requestPermissions(new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, NEED_CAMERA);
+                } else {
+                    openPhotoGraph();
+                }
+
+                break;
+
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        switch (requestCode) {
+            case NEED_CAMERA:
+                // 如果权限被拒绝，grantResults 为空
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openPhotoGraph();
+                } else {
+                    Toast.makeText(context, "改功能需要相机和读写文件权限", Toast.LENGTH_SHORT).show();
+                }
                 break;
 
         }

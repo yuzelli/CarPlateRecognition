@@ -1,5 +1,6 @@
 package com.example.yuzelli.carplaterecognition.view.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -125,11 +126,10 @@ public class AnalyticPictureActivity extends BaseActivity {
         return result.replaceAll("\n", "");
     }
 
-    public static void actionStart(Context context, String path) {
+    public static void actionStart(Activity context, String path) {
         Intent intent = new Intent(context, AnalyticPictureActivity.class);
         intent.putExtra("path", path);
-        context.startActivity(intent);
-
+        context.startActivityForResult(intent,1000);
     }
 
     /**
@@ -168,7 +168,7 @@ public class AnalyticPictureActivity extends BaseActivity {
         return result;
     }
 
-    @OnClick({R.id.img_back, R.id.tv_ok})
+    @OnClick({R.id.img_back, R.id.tv_ok,R.id.tv_congpa})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.img_back:
@@ -192,10 +192,21 @@ public class AnalyticPictureActivity extends BaseActivity {
                 carLists.add(car);
                 SharePreferencesUtil.saveObject(context,ConstantsUtils.CAR_INFO,carLists);
                 craetExcel();
+                Intent intent = new Intent();
+                setResult(1001, intent);
+                finish();
+
+                break;
+            case R.id.tv_congpa:
+                Intent intent2 = new Intent();
+                setResult(1001, intent2);
                 finish();
 
                 break;
         }
+    }
+
+    private void congpa() {
     }
 
 
